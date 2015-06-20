@@ -1,17 +1,18 @@
-// c4.c - C in four functions
+/* c4.c - C in four functions
+*
+* Data types : char, int, and pointer types.
+* Conditional statements: if, while, return, and expression statements.
+* Features: Just enough features to allow self-compilation and a bit more..
 
-// char, int, and pointer types
-// if, while, return, and expression statements
-// just enough features to allow self-compilation and a bit more
+* Written by Robert Swierczek
+*/
 
-// Written by Robert Swierczek
-
-#include <stdio.h>
-#include <stdlib.h>
+#include <stdio.h> // Library used for the basic input/output functions
+#include <stdlib.h> // The standard library functions like - are linked from this library
 #include <memory.h>
 #include <unistd.h>
 
-char *p, *lp, // current position in source code
+char *p, *lp, // For marking and maintaining the current position of the read pointer in the source code. Parsing the code files.
      *data;   // data/bss pointer
 
 int *e, *le,  // current position in emitted code
