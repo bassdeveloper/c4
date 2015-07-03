@@ -5,15 +5,21 @@
 * Features: Just enough features to allow self-compilation and a bit more..
 
 * Written by Robert Swierczek
+* Edited and documented by Rishabh Chakrabarti
 */
 
-#include <stdio.h> // Library used for the basic input/output functions
-#include <stdlib.h> // The standard library functions like - are linked from this library
-#include <memory.h>
-#include <unistd.h>
+#include <stdio.h> 
+/* Library used for the basic input/output functions. 
+ * Functions used -> printf, scanf.
+ */
+#include <stdlib.h> 
+/*The standard library functions like - are linked from this library.
+ * */
+#include <memory.h> // Memory header file for memory manipulation and memory allocation functions.
+#include <unistd.h> // Unistd ?      
 
 char *p, *lp, // For marking and maintaining the current position of the read pointer in the source code. Parsing the code files.
-     *data;   // data/bss pointer
+     *data;   // data/bss pointer 
 
 int *e, *le,  // current position in emitted code
     *id,      // currently parsed identifier
@@ -22,43 +28,50 @@ int *e, *le,  // current position in emitted code
     ival,     // current token value
     ty,       // current expression type
     loc,      // local variable offset
-    line,     // current line number
+    line,     // current line number  
     src,      // print source and assembly flag
     debug;    // print executed instructions
+// The following are enums without any identifiers, thus defining a number of constants to skip the step of maintaining a series of #defines
+// The Different genres of constants:
 
-// tokens and classes (operators last and in precedence order)
+// 1. Tokens and Classes (Operators are mentioned last and in order of precedence)
 enum {
   Num = 128, Fun, Sys, Glo, Loc, Id,
   Char, Else, Enum, If, Int, Return, Sizeof, While,
   Assign, Cond, Lor, Lan, Or, Xor, And, Eq, Ne, Lt, Gt, Le, Ge, Shl, Shr, Add, Sub, Mul, Div, Mod, Inc, Dec, Brak
 };
 
-// opcodes
+// 2. Opcodes
 enum { LEA ,IMM ,JMP ,JSR ,BZ  ,BNZ ,ENT ,ADJ ,LEV ,LI  ,LC  ,SI  ,SC  ,PSH ,
        OR  ,XOR ,AND ,EQ  ,NE  ,LT  ,GT  ,LE  ,GE  ,SHL ,SHR ,ADD ,SUB ,MUL ,DIV ,MOD ,
        OPEN,READ,CLOS,PRTF,MALC,MSET,MCMP,EXIT };
 
-// types
+// 3. Types
 enum { CHAR, INT, PTR };
 
-// identifier offsets (since we can't create an ident struct)
+// 4. Identifier Offsets (since we can't create an ident struct)
 enum { Tk, Hash, Name, Class, Type, Val, HClass, HType, HVal, Idsz };
 
+// Next -
 void next()
 {
   char *pp;
-
-  while (tk = *p) {
-    ++p;
-    if (tk == '\n') {
-      if (src) {
-        printf("%d: %.*s", line, p - lp, lp);
-        lp = p;
-        while (le < e) {
+  /* How is there a comparison between the character pointer (current position) data with the integer ( current token )? 
+   * Objective not understood!
+   */
+  while(tk == *p){ //  While current token is not equal to current position, execute the following loop. Comparing the integer tk with data at p (character pointer)
+  
+    ++p;          // Increment the current position by 1. 
+    if (tk == '\n'){ // If current token is equal to the newline character (escape sequence).
+      if (src){ // If print source/assembly flag exists, 
+        printf("%d: %ld %s", line,p - lp, lp); // 
+        lp = p; // Put the value of current position (character pointer ) in the 'lp' (character pointer).
+        while (le < e) // While current position2 in the emitted code (integer) is less than the current position1 in emitted code (integer).
           printf("%8.4s", &"LEA ,IMM ,JMP ,JSR ,BZ  ,BNZ ,ENT ,ADJ ,LEV ,LI  ,LC  ,SI  ,SC  ,PSH ,"
                            "OR  ,XOR ,AND ,EQ  ,NE  ,LT  ,GT  ,LE  ,GE  ,SHL ,SHR ,ADD ,SUB ,MUL ,DIV ,MOD ,"
-                           "OPEN,READ,CLOS,PRTF,MALC,MSET,MCMP,EXIT,"[*++le * 5]);
-          if (*le <= ADJ) printf(" %d\n", *++le); else printf("\n");
+                           "OPEN,READ,CLOS,PRTF,MALC,MSET,MCMP,EXIT,"[*(++le) * 5]); //   
+          if (*le <= ADJ) printf(" %d\n", *++le); 
+          else printf("\n");
         }
       }
       ++line;
@@ -330,13 +343,38 @@ void stmt()
 }
 
 int main(int argc, char **argv)
+/*
+ * Two special built-in arguments, argc and argv, are used to receive command line arguments.
+ *  Argument counter (argc)
+ * The argc parameter holds the number of arguments on the command line and is an integer. 
+ * It is always at least 1 because the name of the program qualifies as the first argument.
+ * Arguent variable (argv)
+ * The argv parameter is a pointer to an array of character pointers. 
+ * Each element in this array points to a command line argument. 
+ * All command line arguments are strings— any numbers will have to be converted by the program into the proper binary format, manually.
+ * 
+ * Here, the argv is a pointer to a pointer (2D array initialiation). This means that the expected input is an array of strings and the number of strings is specified by argc.
+ */
 {
-  int fd, bt, ty, poolsz, *idmain;
-  int *pc, *sp, *bp, a, cycle; // vm registers
+  int fd, bt, ty, poolsz, *idmain; 
+  int *pc, *sp, *bp, a, cycle; // vm (Virtual Machine) registers.
   int i, *t; // temps
 
+/* Since the minimum value of 'argc' is 1 as the program name counts as an argument, one needs to decrement the argc by 1 to check the following conditions:
+ * Case 1: There are three strings in the argv array
+ * 		a. The 
+ * argv is incremented by 1 since the default or zeroth value would be the program name.
+ */
+
   --argc; ++argv;
-  if (argc > 0 && **argv == '-' && (*argv)[1] == 's') { src = 1; --argc; ++argv; }
+  /* **argv points to the 1st element(character) of the 1st string of the 2D array declared. Thus, **argc=(*argc)[0].
+   * Two flags are set.
+   * 1. Src-> Source flag. The source flag is turned on if the '-s' attribute is given as an argument
+   */
+  if (argc > 0 && (*argv)[0] == '-' && (*argv)[1] == 's') { src = 1; --argc; ++argv; }
+  /* If string.g were used, we could have avoided the above method and used an alternative:
+   * if ( (argc > 0) && (strcmp(argv,"-s")==0) ){ src = 1; --argc; ++argv; }
+   * */
   if (argc > 0 && **argv == '-' && (*argv)[1] == 'd') { debug = 1; --argc; ++argv; }
   if (argc < 1) { printf("usage: c4 [-s] [-d] file ...\n"); return -1; }
 
@@ -363,6 +401,15 @@ int main(int argc, char **argv)
   if ((i = read(fd, p, poolsz-1)) <= 0) { printf("read() returned %d\n", i); return -1; }
   p[i] = 0;
   close(fd);
+  
+  
+  
+  
+  
+  
+  
+  
+  
 
   // parse declarations
   line = 1;
@@ -521,6 +568,6 @@ int main(int argc, char **argv)
     else if (i == MSET) a = (int)memset((char *)sp[2], sp[1], *sp);
     else if (i == MCMP) a = memcmp((char *)sp[2], (char *)sp[1], *sp);
     else if (i == EXIT) { printf("exit(%d) cycle = %d\n", *sp, cycle); return *sp; }
-    else { printf("unknown instruction = %d! cycle = %d\n", i, cycle); return -1; }
+    else { printf("Unknown Instruction = %d! cycle = %d\n", i, cycle); return -1; }
   }
 }
