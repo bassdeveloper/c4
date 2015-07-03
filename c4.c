@@ -10,13 +10,26 @@
 
 #include <stdio.h> 
 /* Library used for the basic input/output functions. 
- * Functions used -> printf, scanf.
+ * Functions used -> 
+ * 1. printf, 
+ * 2. scanf.
  */
 #include <stdlib.h> 
 /*The standard library functions like - are linked from this library.
  * */
-#include <memory.h> // Memory header file for memory manipulation and memory allocation functions.
-#include <unistd.h> // Unistd ?      
+#include <memory.h> 
+/* Memory header file for memory manipulation and memory allocation functions.
+ * Functions used:
+ * 1. malloc() 
+ * */
+#include <unistd.h> 
+/* Description :
+ * In the C and C++ programming languages, unistd.h is the name of the header file that provides access to the POSIX operating system API. 
+ * It is defined by the POSIX.1 standard, the base of the Single Unix Specification, and should therefore be available in any conforming (or quasi-conforming) operating system/compiler (all official versions of UNIX, including Mac OS X, GNU/Linux, etc.).
+ * On Unix-like systems, the interface defined by unistd.h is typically made up largely of system call wrapper functions such as fork, pipe and I/O primitives (read, write, close, etc.).
+ * Functions used from the following header:
+ * 1. open()
+ */
 
 char *p, *lp, // For marking and maintaining the current position of the read pointer in the source code. Parsing the code files.
      *data;   // data/bss pointer 
@@ -24,6 +37,7 @@ char *p, *lp, // For marking and maintaining the current position of the read po
 int *e, *le,  // current position in emitted code
     *id,      // currently parsed identifier
     *sym,     // symbol table (simple list of identifiers)
+// The above int pointers are declared for memory allocation in main. 
     tk,       // current token
     ival,     // current token value
     ty,       // current expression type
@@ -357,6 +371,13 @@ int main(int argc, char **argv)
  */
 {
   int fd, bt, ty, poolsz, *idmain; 
+  /* The integers are described as follows:
+   * 1. fd = Stores the output from the open() function. If successful, will store a non-negative value. If not, it will store the error code of the error type.
+   * 2. bt = 
+   * 3. ty =
+   * 4. poolsz = Poolsize of the buffer.
+   * 5. *idmain = Integer pointer for keeping track of main. 
+   * */ 
   int *pc, *sp, *bp, a, cycle; // vm (Virtual Machine) registers.
   int i, *t; // temps
 
@@ -369,35 +390,60 @@ int main(int argc, char **argv)
   --argc; ++argv;
   /* **argv points to the 1st element(character) of the 1st string of the 2D array declared. Thus, **argc=(*argc)[0].
    * Two flags are set.
-   * 1. Src-> Source flag. The source flag is turned on if the '-s' attribute is given as an argument
+   * 1. Src-> Source flag (Print source and assembly flag). The source flag is turned on if the '-s' attribute is given as an argument.
+   * 2. Debug-> Debug flag. The debug flag is turned on if the '-d' attribute is given as an argument.
    */
   if (argc > 0 && (*argv)[0] == '-' && (*argv)[1] == 's') { src = 1; --argc; ++argv; }
-  /* If string.g were used, we could have avoided the above method and used an alternative:
+  /* If string.h were used, we could have avoided the above method and used an alternative:
    * if ( (argc > 0) && (strcmp(argv,"-s")==0) ){ src = 1; --argc; ++argv; }
    * */
   if (argc > 0 && **argv == '-' && (*argv)[1] == 'd') { debug = 1; --argc; ++argv; }
+  // Default case: The default case gives an output where it prompts the user to input the command in a certain manner.
   if (argc < 1) { printf("usage: c4 [-s] [-d] file ...\n"); return -1; }
-
+	// fd flag stores the output of the open() function. If an error occurs, it can be mapped to the exact error type using the error code. 
   if ((fd = open(*argv, 0)) < 0) { printf("could not open(%s)\n", *argv); return -1; }
-
-  poolsz = 256*1024; // arbitrary size
+/* If open() returns '-1' as a return value, i.e. less than zero, this indicates that the file has failed to open!
+ * Function: int open (const char *filename, int flags[, mode_t mode])
+ * 1. Argument 1: (const char* filename.) i.e. The 'const' specifies that the function cannot change the 
+ * 2. Argument 2: The flags argument controls how the file is to be opened. 
+ * This is a bit mask; you create the value by the bitwise OR of the appropriate parameters (using the `|' operator in C).
+ * Bit mask:-
+ * 1. Mask : Masking is the process or operation to set bit on to off or off to on in a byte,nibble or word.
+ * 2. 
+ * Errors are negative values and each error has a specified code/error number.
+ * */
+  poolsz = 256*1024; // Arbitrary size for pool memory allocation.
+  /* The variables:
+   * 1. sym,le,e are global int pointers, now allocated memory of size=poolsz. Integer arrays namely.
+   * 	a. sym = SYMBOL Table
+   * 	b. le = ?
+   * 	c. e = ?
+   * 2. data -> data/bss pointer (char*).
+   * 3. sp = Virtual machine register (stack pointer)
+   * 
+   * The memory is allocated to the above pointers alongwith the error cases and outputs in the below code block.
+   * */
   if (!(sym = malloc(poolsz))) { printf("could not malloc(%d) symbol area\n", poolsz); return -1; }
   if (!(le = e = malloc(poolsz))) { printf("could not malloc(%d) text area\n", poolsz); return -1; }
   if (!(data = malloc(poolsz))) { printf("could not malloc(%d) data area\n", poolsz); return -1; }
   if (!(sp = malloc(poolsz))) { printf("could not malloc(%d) stack area\n", poolsz); return -1; }
-
+// Memory initialization.
   memset(sym,  0, poolsz);
   memset(e,    0, poolsz);
   memset(data, 0, poolsz);
 
   p = "char else enum if int return sizeof while "
-      "open read close printf malloc memset memcmp exit void main";
+		"open read close printf malloc memset memcmp exit void main";
   i = Char; while (i <= While) { next(); id[Tk] = i++; } // add keywords to symbol table
   i = OPEN; while (i <= EXIT) { next(); id[Class] = Sys; id[Type] = INT; id[Val] = i++; } // add library to symbol table
   next(); id[Tk] = Char; // handle void type
   next(); idmain = id; // keep track of main
 
   if (!(lp = p = malloc(poolsz))) { printf("could not malloc(%d) source area\n", poolsz); return -1; }
+  /* Function-> read()
+   * Arguments:
+   * 1.  
+  */
   if ((i = read(fd, p, poolsz-1)) <= 0) { printf("read() returned %d\n", i); return -1; }
   p[i] = 0;
   close(fd);
