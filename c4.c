@@ -5,7 +5,21 @@
 * Features: Just enough features to allow self-compilation and a bit more..
 
 * Written by Robert Swierczek
-* Edited and documented by Rishabh Chakrabarti
+* Edited and documented by Rishabh Chakrabarti 
+* 
+* Note: Since code is comparatively minimal and a bit compressed and without lay-friendly documentation, I have decided to comment the entire code for understanding. 
+* 
+* With reference from the website and the discussion that follows on it, 
+* Source: https://news.ycombinator.com/item?id=8558822
+* 
+* There are three levels to consider:
+* 1. Readability for modification
+* 2. Readability for the "what"
+* 3. Readability for the "why"
+* 
+* I have tried to keep these three levels in mind while documenting the whole code. 
+* 
+* Advice for newbies-> START from the main(). 
 */
 
 #include <stdio.h> 
@@ -66,7 +80,9 @@ enum { CHAR, INT, PTR };
 // 4. Identifier Offsets (since we can't create an ident struct)
 enum { Tk, Hash, Name, Class, Type, Val, HClass, HType, HVal, Idsz };
 
-// Next -
+
+// Next Function:
+
 void next()
 {
   char *pp;
@@ -370,6 +386,8 @@ int main(int argc, char **argv)
  * Here, the argv is a pointer to a pointer (2D array initialiation). This means that the expected input is an array of strings and the number of strings is specified by argc.
  */
 {
+	//****** Variable Declarations:
+	
   int fd, bt, ty, poolsz, *idmain; 
   /* The integers are described as follows:
    * 1. fd = Stores the output from the open() function. If successful, will store a non-negative value. If not, it will store the error code of the error type.
@@ -386,6 +404,11 @@ int main(int argc, char **argv)
  * 		a. The 
  * argv is incremented by 1 since the default or zeroth value would be the program name.
  */
+
+
+
+
+// ******* Input Assimilation:
 
   --argc; ++argv;
   /* **argv points to the 1st element(character) of the 1st string of the 2D array declared. Thus, **argc=(*argc)[0].
@@ -412,6 +435,11 @@ int main(int argc, char **argv)
  * 2. 
  * Errors are negative values and each error has a specified code/error number.
  * */
+ 
+
+
+ // ****** Actual inernal program starts after input assimilation:
+ 
   poolsz = 256*1024; // Arbitrary size for pool memory allocation.
   /* The variables:
    * 1. sym,le,e are global int pointers, now allocated memory of size=poolsz. Integer arrays namely.
@@ -427,13 +455,17 @@ int main(int argc, char **argv)
   if (!(le = e = malloc(poolsz))) { printf("could not malloc(%d) text area\n", poolsz); return -1; }
   if (!(data = malloc(poolsz))) { printf("could not malloc(%d) data area\n", poolsz); return -1; }
   if (!(sp = malloc(poolsz))) { printf("could not malloc(%d) stack area\n", poolsz); return -1; }
+  
 // Memory initialization.
   memset(sym,  0, poolsz);
   memset(e,    0, poolsz);
   memset(data, 0, poolsz);
-
+  
+// ?
+// (char*) p is pointed to the constant string specified below.
   p = "char else enum if int return sizeof while "
 		"open read close printf malloc memset memcmp exit void main";
+/* i is set to the enumeration 'Char' declared earlier.*/
   i = Char; while (i <= While) { next(); id[Tk] = i++; } // add keywords to symbol table
   i = OPEN; while (i <= EXIT) { next(); id[Class] = Sys; id[Type] = INT; id[Val] = i++; } // add library to symbol table
   next(); id[Tk] = Char; // handle void type
