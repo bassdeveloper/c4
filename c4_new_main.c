@@ -1,3 +1,10 @@
+/* Divided the total program into the following three parts.
+ * 1. c4_new_variables -> Contains all the global variables and header declarations of the program.
+ * 2. c4_new_main -> Contains the main function and body.
+ * 3. c4_new_func -> Contains the functions that will work with the main.
+ * */
+
+
 int main(int argc, char **argv)
 /*
  * Two special built-in arguments, argc and argv, are used to receive command line arguments.
