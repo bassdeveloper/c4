@@ -1,17 +1,14 @@
 /* This file contains the functions that are being called upon in the main()
  * In the execution, this is the first function encountered and hence needs to be the function that will be worked upon.
  * */
-
+#include "c4_new_variables.c"
 // Next Function:
 
 void next()
 {
   char *pp;
-  /* How is there a comparison between the character pointer (current position) data with the integer ( current token )? 
-   * Objective not understood!
-   */
-  while(tk == *p){ //  While current token is not equal to current position, execute the following loop. Comparing the integer tk with data at p (character pointer)
-  
+  while(tk == *p)
+  { //  While current token is not equal to current position, execute the following loop. Comparing the integer tk with data at p (character pointer)
     ++p;          // Increment the current position by 1. 
     if (tk == '\n'){ // If current token is equal to the newline character (escape sequence).
       if (src){ // If print source/assembly flag exists, 
@@ -25,8 +22,7 @@ void next()
           else printf("\n");
         }
       }
-      ++line;
-    }
+     // ++line;
     else if (tk == '#') {
       while (*p != 0 && *p != '\n') ++p;
     }
@@ -46,7 +42,7 @@ void next()
       return;
     }
     else if (tk >= '0' && tk <= '9') {
-      if (ival = tk - '0') { while (*p >= '0' && *p <= '9') ival = ival * 10 + *p++ - '0'; }
+      if (ival == tk - '0') { while (*p >= '0' && *p <= '9') ival = ival * 10 + *p++ - '0'; }
       else if (*p == 'x' || *p == 'X') {
         while ((tk = *++p) && ((tk >= '0' && tk <= '9') || (tk >= 'a' && tk <= 'f') || (tk >= 'A' && tk <= 'F')))
           ival = ival * 16 + (tk & 15) + (tk >= 'A' ? 9 : 0);

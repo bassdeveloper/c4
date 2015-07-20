@@ -4,6 +4,7 @@
  * 3. c4_new_func -> Contains the functions that will work with the main.
  * */
 
+#include "c4_new_func.c"
 
 int main(int argc, char **argv)
 /*
